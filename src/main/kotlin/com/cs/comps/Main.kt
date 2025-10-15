@@ -2,30 +2,62 @@ package com.cs.comps
 
 private const val DATA_FILE = "data/assignment_b1.csv"
 
+private fun dumpAll() {
+    val employees = loadEmployees(DATA_FILE)
+        .map { it.copy(performanceScore = computePerformanceScore(it)) }
+    println("Loaded ${employees.size} employees")
+    employees.forEach { println(it) }
+}
+
 private fun runFifo() {
-    val q = LinkedQueue<Employee>()                          
-    loadEmployees(DATA_FILE).sortedBy { it.hireDate }.forEach { q.enqueue(it) }
-    while (!q.isEmpty()) q.dequeue()
-    println("FIFO: OK")
+    val employees = loadEmployees(DATA_FILE)
+        .map { it.copy(performanceScore = computePerformanceScore(it)) }
+        .sortedBy { it.hireDate }
+
+    val q = LinkedQueue<Employee>()
+    employees.forEach { q.enqueue(it) }
+    while (!q.isEmpty()) {
+        val x = q.dequeue()
+        println("Laid off: ${x.id} ${x.name} – Hire Date: ${x.hireDate} – Cost to Company: ${x.costToCompany} – Performance: ${x.performanceScore ?: "insufficient data"}")
+    }
 }
 
 private fun runLifo() {
-    val st = Stack<Employee>()                              
-    loadEmployees(DATA_FILE).sortedBy { it.hireDate }.forEach { st.push(it) }
-    while (!st.isEmpty()) st.pop()
-    println("LIFO: OK")
+    val employees = loadEmployees(DATA_FILE)
+        .map { it.copy(performanceScore = computePerformanceScore(it)) }
+        .sortedBy { it.hireDate }
+
+    val st = Stack<Employee>()
+    employees.forEach { st.push(it) }
+    while (!st.isEmpty()) {
+        val x = st.pop()
+        println("Laid off: ${x.id} ${x.name} – Hire Date: ${x.hireDate} – Cost to Company: ${x.costToCompany} – Performance: ${x.performanceScore ?: "insufficient data"}")
+    }
 }
 
-private fun runPriority() {
-    val ordered = sortEmployeesByCostPerfSalary(loadEmployees(DATA_FILE))   
-    println("PRIORITY: OK (${ordered.size} items)")
+// NEW: priority (min-heap) runner
+private fun runPrio() {
+    runPriorityLayoffs(DATA_FILE)
+}
+
+private fun runAll() {
+    println("=== LIFO ===")
+    runLifo()
+    println("=== FIFO ===")
+    runFifo()
+    println("=== PRIO ===")
+    runPrio()
+    println("=== DUMP ===")
+    dumpAll()
 }
 
 fun main(args: Array<String>) {
     when (args.firstOrNull()?.lowercase()) {
-        "fifo"     -> runFifo()
-        "lifo", "" -> runLifo()
-        "priority" -> runPriority()
-        else       -> runLifo()
+        null, "", "lifo" -> runLifo()
+        "fifo" -> runFifo()
+        "prio" -> runPrio()   // min-heap policy
+        "dump" -> dumpAll()
+        "all"  -> runAll()
+        else   -> runLifo()
     }
 }
