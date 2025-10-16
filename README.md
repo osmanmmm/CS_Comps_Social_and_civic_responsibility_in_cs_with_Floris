@@ -5,7 +5,7 @@ This assignment models different layoff policies with core data structures to hi
 
 - **Part 1 (LIFO)**: *Last Hired, First Fired* — implement a **Stack**.
 - **Part 2 (FIFO)**: *First Hired, First Fired* — implement a **Queue**.
-- **Part 3 (Priority)**: Lay off people who are **more expensive** and **lower-performing** first — implement a **Priority Queue (heap)** with this **five-key order**:
+- **Part 3 (Priority)**: Lay off people who are **more expensive** and **lower-performing** first — implement a **Priority Queue (heap)** with this **two-key order**:
 
 **Priority ordering (highest layoff priority first):**
 1) **costToCompany** — higher first (**DESC**)  
