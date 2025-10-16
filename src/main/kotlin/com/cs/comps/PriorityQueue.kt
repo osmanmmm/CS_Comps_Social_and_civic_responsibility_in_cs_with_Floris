@@ -11,7 +11,7 @@ private const val DATA_FILE = "data/assignment_b1.csv"
  *      - Treat missing/zero cost as the LOWEST (so it never pushes someone up).
  * No other tiebreakers — exact ties are ignored (comparator returns 0).
  *
- * Uses our custom PriorityQueue<T>. Do NOT use java.util.PriorityQueue.
+ 
  */
 fun sortEmployeesByPriority(employees: List<Employee>): List<Employee> {
     // Attach/compute performance scores
