@@ -11,9 +11,8 @@ package com.cs.comps
  *              punctualityRate in 0..1 (may map via 1 + 4*v)
  *
  * Requirements:
- *  1) Be robust to division by zero / NaN / Infinity.
- *  2) Round to nearest Int and clamp to [1,5].
- *  3) Briefly document your weights/choices in comments.
+ *  1) Round to nearest Int and clamp to [1,5].
+ *  2) Briefly document your weights/choices in comments.
  */
 fun computePerformanceScore(e: Employee): Int? {
     // TODO: student implementation
