@@ -10,11 +10,6 @@ This assignment models different layoff policies with core data structures to hi
 **Priority ordering (highest layoff priority first):**
 1) **costToCompany** — higher first (**DESC**)  
 2) **performanceScore** — lower first (**ASC**; treat `null` as worst using `Int.MAX_VALUE`)  
-3) **salary** — higher first (**DESC**)  
-4) **hireDate** — earlier first (**ASC**)  
-5) **id** — lexicographic (**ASC**)
-
-The big idea: code is not neutral—ranking choices become policies with consequences for fairness, equity, and well-being.
 
 ---
 
