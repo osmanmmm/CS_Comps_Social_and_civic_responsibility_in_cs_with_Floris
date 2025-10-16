@@ -58,8 +58,7 @@ Simulates **First Hired, First Fired** (queue employees sorted by `hireDate` asc
      Round to nearest int, clamp to `[1,5]`, and handle divide-by-zero/NaN safely.
 
 2) **Priority policy** (`PriorityQueue.kt`): implement  
-   `sortEmployeesByCostPerfSalary(employees: List<Employee>): List<Employee>` using a heap with **five keys**:
-   - **costToCompany** ↓, then **performanceScore** ↑ (null last), then **salary** ↓, then **hireDate** ↑, then **id** ↑.
+   `sortEmployeesByCostPerfSalary(employees: List<Employee>): List<Employee>` using a heap 
 
 > Heaps aren’t stable, but because you **explicitly code these tie-breakers**, the output should be deterministic for identical prefixes.
 
