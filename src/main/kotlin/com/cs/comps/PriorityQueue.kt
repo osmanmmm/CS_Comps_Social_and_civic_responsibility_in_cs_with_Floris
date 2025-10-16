@@ -1,29 +1,35 @@
 package com.cs.comps
 
-import java.util.PriorityQueue
-import java.util.Comparator
+private const val DATA_FILE = "data/assignment_b1.csv"
 
 /**
- * Build a heap-based layoff order using PriorityQueue.
- * Ordering (highest layoff priority first):
- *  1) costToCompany — DESC
- *  2) performanceScore — ASC (null treated as worst)
- *  3) salary — DESC
- *  4) hireDate — ASC
- *  5) id — ASC
+ * Priority policy (min-heap "smallest" pops first):
+ *   1) Lower performance score first.
+ *      - Real (non-null) scores must come BEFORE "insufficient data" (null).
+ *      - Among real scores, 1 (worst) is laid off before 5 (best).
+ *   2) Higher costToCompany next.
+ *      - Treat missing/zero cost as the LOWEST (so it never pushes someone up).
+ * No other tiebreakers — exact ties are ignored (comparator returns 0).
+ *
+ * Uses our custom PriorityQueue<T>. Do NOT use java.util.PriorityQueue.
  */
-fun sortEmployeesByCostPerfSalary(employees: List<Employee>): List<Employee> {
-    // Attach or compute performanceScore for each employee
+fun sortEmployeesByPriority(employees: List<Employee>): List<Employee> {
+    // Attach/compute performance scores
     val withScores = employees.map { it.copy(performanceScore = computePerformanceScore(it)) }
 
-    // TODO: Create a Comparator<Employee> that enforces the ordering listed in the KDoc.
-    val cmp: Comparator<Employee> = TODO("Create comparator: cost DESC, perf ASC (null last), salary DESC, hireDate ASC, id ASC")
+    // --- Keys 
+    fun perfKey(e: Employee): Int {
+        // TODO:
+        // - If e.performanceScore != null, return that value (1..5) so LOWER pops earlier.
+        // - If null, return Int.MAX_VALUE so "insufficient data" comes AFTER any real score.
+        TODO("perfKey")
+    }
 
-    // TODO: Create a PriorityQueue<Employee> using the comparator and add all employees-with-scores to it.
-    val pq: PriorityQueue<Employee> = TODO("Create PriorityQueue with 'cmp' and add all elements from 'withScores'")
-
-    // TODO: Remove elements from the priority queue one-by-one into 'out' in priority order, then return it.
-    val out = ArrayList<Employee>()
-    TODO("While queue is not empty, poll and append to 'out'")
-    return out
+    fun costKey(e: Employee): Int {
+        // TODO:
+        // - Prefer HIGHER cost next.
+        // - For a MIN-heap, invert positive cost: return -e.costToCompany.
+        // - If cost is missing/zero, return Int.MAX_VALUE so it never boosts priority.
+        TODO("costKey")
+    }
 }
