@@ -11,23 +11,7 @@ This assignment models different layoff policies with core data structures to hi
 1) **costToCompany** — higher first (**DESC**)  
 2) **performanceScore** — lower first (**ASC**; treat `null` as worst using `Int.MAX_VALUE`)  
 
----
 
-## Repo layout
-data/assignment_b1.csv # input data (keep path)
-src/main/kotlin/com/cs/comps/
-Employee.kt # CSV loader + data class (do not change)
-Main.kt # tiny runner that calls your code (do not change)
-Stack.kt # TODOs: push/pop/peek/isEmpty/size
-LinkedQueue.kt # TODOs: enqueue/dequeue/peek/isEmpty/size
-Performance.kt # TODO: computePerformanceScore(e): Int? (1..5 or null)
-PriorityQueue.kt # TODO: heap ordering (5 keys: cost↓, perf↑(null last), salary↓, hireDate↑, id↑)
-README.md
-Reflection.md # your short writeups
-app.jar # prebuilt jar you can run immediately
-
-
----
 
 ## What you implement
 
