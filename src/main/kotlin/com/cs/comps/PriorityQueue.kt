@@ -9,7 +9,7 @@ private const val DATA_FILE = "data/assignment_b1.csv"
  *      - Among real scores, 1 (worst) is laid off before 5 (best).
  *   2) Higher costToCompany next.
  *      - Treat missing/zero cost as the LOWEST (so it never pushes someone up).
- * No other tiebreakers — exact ties are ignored (comparator returns 0).
+ * No other tiebreakers — exact ties are ignored .
  *
  
  */
