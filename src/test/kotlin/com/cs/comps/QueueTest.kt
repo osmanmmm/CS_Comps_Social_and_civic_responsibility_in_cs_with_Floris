@@ -3,6 +3,7 @@ package com.cs.comps
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.NoSuchElementException
 
 class QueueTest {
 
@@ -11,27 +12,21 @@ class QueueTest {
         val q = LinkedQueue<Int>()
         assertTrue(q.isEmpty())
 
-        q.enqueue(1)
-        q.enqueue(2)
-        q.enqueue(3)
+        q.enqueue(1); q.enqueue(2); q.enqueue(3)
 
         assertEquals(3, q.size())
         assertEquals(1, q.dequeue())
         assertEquals(2, q.dequeue())
         assertEquals(3, q.dequeue())
-
-        assertTrue(q.isEmpty())
-        assertEquals(0, q.size())
+        assertTrue(q.isEmpty()); assertEquals(0, q.size())
     }
 
     @Test
     fun peek_returnsFrontWithoutRemoving() {
         val q = LinkedQueue<String>()
-        q.enqueue("a")
-        q.enqueue("b")
+        q.enqueue("a"); q.enqueue("b")
 
         assertEquals("a", q.peek())
-        // still there
         assertEquals(2, q.size())
         assertEquals("a", q.dequeue())
         assertEquals("b", q.dequeue())
@@ -74,11 +69,32 @@ class QueueTest {
     }
 
     @Test
+    fun enqueueDequeue_toEmpty_thenEnqueueAgain_headTailReset() {
+        val q = LinkedQueue<Int>()
+        q.enqueue(1)
+        assertEquals(1, q.dequeue())
+        assertTrue(q.isEmpty())
+
+        q.enqueue(2); q.enqueue(3)
+        assertEquals(2, q.dequeue())
+        assertEquals(3, q.dequeue())
+        assertTrue(q.isEmpty())
+    }
+
+    @Test
+    fun manyCycles_noLossOrDuplication() {
+        val q = LinkedQueue<Int>()
+        repeat(100) {
+            for (i in 1..50) q.enqueue(i)
+            for (i in 1..50) assertEquals(i, q.dequeue())
+        }
+        assertTrue(q.isEmpty())
+    }
+
+    @Test
     fun supportsNullableElements_whenTypeIsNullable() {
         val q = LinkedQueue<Int?>()
-        q.enqueue(null)
-        q.enqueue(7)
-
+        q.enqueue(null); q.enqueue(7)
         assertNull(q.dequeue())
         assertEquals(7, q.dequeue())
         assertTrue(q.isEmpty())
