@@ -1,17 +1,11 @@
-# Build outputs
+# Build
 target/
-build/
-out/
-*.class
-*.jar
-
-# IDE settings
+# IDEs
 .idea/
 .vscode/
 *.iml
-
-# OS files
+# OS
 .DS_Store
-
-# Optional caches
-.gradle/
+# Kotlin/Java artifacts
+*.class
+*.jar
