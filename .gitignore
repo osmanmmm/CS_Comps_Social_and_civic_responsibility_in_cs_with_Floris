@@ -1,0 +1,17 @@
+# Build outputs
+target/
+build/
+out/
+*.class
+*.jar
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+
+# Optional caches
+.gradle/
