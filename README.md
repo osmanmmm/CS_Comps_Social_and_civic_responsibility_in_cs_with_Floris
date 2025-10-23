@@ -69,7 +69,7 @@ mvn -q exec:java -Dexec.mainClass=com.cs.comps.MainKt -Dexec.args="all"
 
 ---
 
-## Notes (Student Starter)
+## Notes 
 
 * In the starter version, `lifo`, `fifo`, and `priority` will **fail intentionally** with messages like:
 
