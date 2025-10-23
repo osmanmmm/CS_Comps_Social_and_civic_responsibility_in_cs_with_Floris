@@ -1,62 +1,88 @@
-# Assignment B — Stacks, Queues, and Priority Queues (Kotlin)
+#  How to Build & Run
 
-## Overview
-This assignment models different layoff policies with core data structures to highlight their social and ethical impacts:
-
-- **Part 1 (LIFO)**: *Last Hired, First Fired* — implement a **Stack**.
-- **Part 2 (FIFO)**: *First Hired, First Fired* — implement a **Queue**.
-- **Part 3 (Priority)**: Lay off people who are **more expensive** and **lower-performing** first — implement a **Priority Queue (heap)** with this **two-key order**:
-
-**Priority ordering (highest layoff priority first):**
-1) **costToCompany** — higher first (**DESC**)  
-2) **performanceScore** — lower first (**ASC**; treat `null` as worst using `Int.MAX_VALUE`)  
-
-
-
-## What you implement
-
-### Part 1 — LIFO (Stack)
-Implement a singly-linked `Stack<T>`:
-- `push(item: T)`, `pop(): T`, `peek(): T?`, `isEmpty(): Boolean`, `size(): Int`.
-
-Simulates **Last Hired, First Fired** (most recent hire pops first).
-
-### Part 2 — FIFO (Queue)
-Implement a singly-linked `LinkedQueue<T>` with head/tail:
-- `enqueue(x: T)`, `dequeue(): T`, `peek(): T?`, `isEmpty(): Boolean`, `size(): Int`.
-
-Simulates **First Hired, First Fired** (queue employees sorted by `hireDate` ascending).
-
-### Part 3 — Priority Queue + Performance Score
-1) **Performance score** (`Performance.kt`): implement  
-   `computePerformanceScore(e: Employee): Int?` → **Int 1..5** (or `null` if insufficient)
-   - **Reviews (R):** average available values from `selfEvaluation`, `peer360Feedback`, `managerFeedback`, and `okr/20`.
-   - **Behavior (B):** `productivity = problemsFixed / problemsAssigned` (only if assigned > 0) and `punctualityRate`.  
-     Map any value in `[0,1]` to `[1,5]` with `1 + 4*v`. Average available parts.
-   - **Combine:** if both exist → `0.7*R + 0.3*B`; if only one exists → use it.  
-     Round to nearest int, clamp to `[1,5]`, and handle divide-by-zero/NaN safely.
-
-2) **Priority policy** (`PriorityQueue.kt`): implement  
-   `sortEmployeesByCostPerfSalary(employees: List<Employee>): List<Employee>` using a heap 
-
-> Heaps aren’t stable, but because you **explicitly code these tie-breakers**, the output should be deterministic for identical prefixes.
+> Run commands **from the repo root**. The program expects the CSV at `data/assignment_b1.csv`.
 
 ---
 
-## How to build & run
+## Step 1 — Confirm Java 17
 
-> The program expects the CSV at `data/assignment_b1.csv`. **Run from the repo root.**  
-> Program arguments: `lifo`, `fifo`, `priority`.
+Check your Java version:
 
-### Option 1 — Run the provided jar (no build required)
-
-**macOS / Linux**
 ```bash
-java -cp app.jar com.cs.comps.MainKt lifo
-java -cp app.jar com.cs.comps.MainKt fifo
-java -cp app.jar com.cs.comps.MainKt priority
+java -version
+```
 
-Expected confirmations: 
-LIFO: OK
-FIFO: OK
-PRIORITY: OK (N items) 
+You should see something like:
+
+```
+java version "17.x"
+```
+
+If not (macOS / Linux), set your environment and re-open your terminal:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+---
+
+## Step 2 — Build the project
+
+```bash
+mvn -q clean compile
+```
+
+---
+
+## Step 3 — Run each mode (via Maven)
+
+**LIFO** — Last Hired, First Fired (Stack):
+
+```bash
+mvn -q exec:java -Dexec.mainClass=com.cs.comps.MainKt -Dexec.args="lifo"
+```
+
+**FIFO** — First Hired, First Fired (Queue):
+
+```bash
+mvn -q exec:java -Dexec.mainClass=com.cs.comps.MainKt -Dexec.args="fifo"
+```
+
+**PRIORITY** — Min-heap policy:
+
+```bash
+mvn -q exec:java -Dexec.mainClass=com.cs.comps.MainKt -Dexec.args="priority"
+```
+
+**Optional** — Print all loaded employees (no scoring):
+
+```bash
+mvn -q exec:java -Dexec.mainClass=com.cs.comps.MainKt -Dexec.args="dump"
+```
+
+**Run all policies in sequence**:
+
+```bash
+mvn -q exec:java -Dexec.mainClass=com.cs.comps.MainKt -Dexec.args="all"
+```
+
+---
+
+## Notes (Student Starter)
+
+* In the starter version, `lifo`, `fifo`, and `priority` will **fail intentionally** with messages like:
+
+  * `An operation is not implemented: push not implemented`
+  * `An operation is not implemented: enqueue not implemented`
+  * `An operation is not implemented: sortEmployeesByPriority not fully implemented`
+* `dump` **should** work and list all employees (with `performanceScore=null`).
+
+---
+
+## Troubleshooting
+
+* **“parameters 'mainClass' … missing or invalid”**
+  Make sure you include `-Dexec.mainClass=com.cs.comps.MainKt` exactly as shown above.
+* **CSV not found**
+  Ensure you’re running from the repo root so `data/assignment_b1.csv` is resolvable.

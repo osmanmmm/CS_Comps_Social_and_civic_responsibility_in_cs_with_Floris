@@ -5,16 +5,12 @@ package com.cs.comps
  * if there isn’t enough usable data.
  *
  * Consider:
- *  - Reviews: selfEvaluation, peer360Feedback, managerFeedback (≈ 1..5)
- *  - OKR: 0..100 (rescale to 1..5 if you use it)
- *  - Behavior: productivity = problemsFixed / problemsAssigned (only if assigned > 0)
- *              punctualityRate in 0..1 (may map via 1 + 4*v)
- *
- * Requirements:
- *  1) Round to nearest Int and clamp to [1,5].
- *  2) Briefly document your weights/choices in comments.
+ *  - Reviews (R): selfEvaluation, peer360Feedback, managerFeedback, okr/20
+ *  - Behavior (B): productivity = problemsFixed / problemsAssigned (>0), punctualityRate
+ * Map any value in [0,1] to [1,5] via 1 + 4*v; combine:
+ *   both -> 0.7*R + 0.3*B; only one -> use it; round; clamp to [1,5].
  */
 fun computePerformanceScore(e: Employee): Int? {
-    // TODO: student implementation
+    // Leave this as a stub so the app runs even before students implement it.
     return null
 }

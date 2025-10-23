@@ -1,13 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.cs.comps</groupId>
   <artifactId>cs-comps</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.version>1.9.24</kotlin.version>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -34,6 +35,7 @@
       <version>${kotlin.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-test-junit5</artifactId>
@@ -47,6 +49,7 @@
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
 
     <plugins>
+      <!-- Kotlin compiler -->
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
@@ -55,12 +58,16 @@
           <execution>
             <id>compile</id>
             <phase>compile</phase>
-            <goals><goal>compile</goal></goals>
+            <goals>
+              <goal>compile</goal>
+            </goals>
           </execution>
           <execution>
             <id>test-compile</id>
             <phase>test-compile</phase>
-            <goals><goal>test-compile</goal></goals>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
           </execution>
         </executions>
         <configuration>
@@ -68,12 +75,28 @@
         </configuration>
       </plugin>
 
+      <!-- Unit tests -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
           <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+
+      <!-- Run the app via `mvn exec:java -Dexec.args="dump|priority|lifo|fifo|all"` -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <!-- Kotlin entrypoint -->
+          <mainClass>com.cs.comps.MainKt</mainClass>
+          <!-- Ensure relative paths like data/assignment_b1.csv resolve from repo root -->
+          <workingDirectory>${project.basedir}</workingDirectory>
+          <classpathScope>runtime</classpathScope>
+          <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>
     </plugins>
