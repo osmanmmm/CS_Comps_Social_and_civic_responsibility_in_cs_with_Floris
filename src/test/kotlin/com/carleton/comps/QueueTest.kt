@@ -1,79 +1,116 @@
 package com.carleton.comps
 
-import com.cs.comps.Employee
-import com.cs.comps.computePerformanceScore
+import com.cs.comps.LinkedQueue
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import org.junit.jupiter.api.assertThrows
 
 class QueueTest {
 
-    private fun baseEmp(
-        id: String = "X",
-        self: Double = Double.NaN,
-        peer: Double = Double.NaN,
-        mgr: Double = Double.NaN,
-        okr: Double = Double.NaN,
-        punctuality: Double = Double.NaN,
-        fixed: Int = 0,
-        assigned: Int = 0
-    ): Employee = Employee(
-        id = id, name = id, hireDate = LocalDate.parse("2022-01-01"),
-        role = "r", salary = 0, tenureMonths = 0,
-        punctualityRate = punctuality, problemsFixed = fixed, problemsAssigned = assigned,
-        volunteeringHours = 0, costToCompany = 0,
-        dept = "d", manager = "m", location = "loc", employmentType = "full",
-        selfEvaluation = self, peer360Feedback = peer, managerFeedback = mgr, okr = okr,
-        gender = "g", disabilityStatus = "No", sponsorship = "No", performanceScore = null
-    )
-
     @Test
-    fun perfectReviewsAndBehavior_scoreIs5() {
-        val e = baseEmp(self = 5.0, peer = 5.0, mgr = 5.0, okr = 100.0,
-                        punctuality = 1.0, fixed = 10, assigned = 10)
-        assertEquals(5, computePerformanceScore(e))
+    fun enqueuesIncreaseSizeAndPeekShowsFront() {
+        val q = LinkedQueue<Int>()
+        assertTrue(q.isEmpty())
+        assertEquals(0, q.size())
+
+        q.enqueue(10)
+        assertFalse(q.isEmpty())
+        assertEquals(1, q.size())
+        assertEquals(10, q.peek())
+
+        q.enqueue(20)
+        assertEquals(2, q.size())
+        // front stays 10
+        assertEquals(10, q.peek())
     }
 
     @Test
-    fun reviewsOnly_whenBehaviorMissing_usesReviewsMean() {
-        val e = baseEmp(self = 2.0, peer = 2.0, mgr = 2.0, okr = 40.0,
-                        punctuality = Double.NaN, fixed = 0, assigned = 0)
-        assertEquals(2, computePerformanceScore(e))
+    fun dequeueReturnsFrontAndShrinks() {
+        val q = LinkedQueue<String>()
+        q.enqueue("a"); q.enqueue("b"); q.enqueue("c")
+        assertEquals(3, q.size())
+
+        assertEquals("a", q.dequeue())
+        assertEquals(2, q.size())
+        assertEquals("b", q.peek())
+
+        assertEquals("b", q.dequeue())
+        assertEquals(1, q.size())
+        assertEquals("c", q.peek())
+
+        assertEquals("c", q.dequeue())
+        assertEquals(0, q.size())
+        assertTrue(q.isEmpty())
     }
 
     @Test
-    fun behaviorOnly_whenReviewsMissing_averagesMappedSignals_andRounds() {
-        val e = baseEmp(punctuality = 0.25, fixed = 10, assigned = 20)
-        assertEquals(3, computePerformanceScore(e))
+    fun fifoOrderingWithMultipleElements() {
+        val q = LinkedQueue<Int>()
+        (1..5).forEach { q.enqueue(it) } // front = 1
+        val out = mutableListOf<Int>()
+        while (!q.isEmpty()) out += q.dequeue()
+        assertEquals(listOf(1, 2, 3, 4, 5), out) // FIFO
     }
 
     @Test
-    fun combined_usesWeights_pointSevenReviews_pointThreeBehavior_andRoundsHalfUp() {
-        val e = baseEmp(self = 3.0, peer = 3.0, mgr = 3.0, okr = 80.0,
-                        punctuality = 0.5, fixed = 1, assigned = 4)
-        assertEquals(3, computePerformanceScore(e))
+    fun peekOnEmptyReturnsNull() {
+        val q = LinkedQueue<Double>()
+        assertNull(q.peek())
+        q.enqueue(3.14)
+        assertEquals(3.14, q.peek())
+        q.dequeue()
+        assertNull(q.peek())
     }
 
     @Test
-    fun productivitySkippedWhenAssignedIsZero() {
-        val e = baseEmp(punctuality = 0.9, fixed = 10, assigned = 0)
-        assertEquals(5, computePerformanceScore(e))
+    fun dequeueOnEmptyThrows() {
+        val q = LinkedQueue<Int>()
+        assertThrows<NoSuchElementException> { q.dequeue() }
     }
 
     @Test
-    fun returnsNull_whenNoUsableReviewOrBehaviorSignals() {
-        val e = baseEmp(self = Double.NaN, peer = Double.NaN, mgr = Double.NaN, okr = Double.NaN,
-                        punctuality = Double.NaN, fixed = 0, assigned = 0)
-        assertNull(computePerformanceScore(e))
+    fun sizeAndIsEmptyStayConsistentThroughOps() {
+        val q = LinkedQueue<Int>()
+        assertTrue(q.isEmpty())
+        q.enqueue(1); q.enqueue(2); q.enqueue(3)
+        assertEquals(3, q.size())
+        assertFalse(q.isEmpty())
+
+        q.dequeue()
+        assertEquals(2, q.size())
+        q.dequeue()
+        assertEquals(1, q.size())
+        q.dequeue()
+        assertEquals(0, q.size())
+        assertTrue(q.isEmpty())
+        assertNull(q.peek())
     }
 
     @Test
-    fun clampsFinalToRangeOneToFive() {
-        val eLow = baseEmp(punctuality = 0.0, fixed = 0, assigned = 0)
-        val eHigh = baseEmp(self = 5.0, peer = 5.0, mgr = 5.0, okr = 100.0)
-        val sLow = computePerformanceScore(eLow)
-        val sHigh = computePerformanceScore(eHigh)
-        assertNotNull(sLow); assertTrue(sLow!! in 1..5)
-        assertNotNull(sHigh); assertTrue(sHigh!! in 1..5)
+    fun worksWithGenericTypes() {
+        data class E(val id: Int, val name: String)
+        val q = LinkedQueue<E>()
+        q.enqueue(E(1, "Ada"))
+        q.enqueue(E(2, "Grace"))
+        assertEquals(E(1, "Ada"), q.peek())
+        assertEquals(E(1, "Ada"), q.dequeue())
+        assertEquals(E(2, "Grace"), q.dequeue())
+    }
+
+    @Test
+    fun interleavedEnqueueDequeueMaintainsOrder() {
+        val q = LinkedQueue<Int>()
+        q.enqueue(1)
+        q.enqueue(2)
+        assertEquals(1, q.dequeue())
+
+        q.enqueue(3)
+        q.enqueue(4)
+        assertEquals(2, q.dequeue())
+        assertEquals(3, q.dequeue())
+        assertEquals(4, q.dequeue())
+
+        assertTrue(q.isEmpty())
+        assertNull(q.peek())
     }
 }
