@@ -1,79 +1,98 @@
 package com.carleton.comps
 
-import com.cs.comps.Employee
-import com.cs.comps.computePerformanceScore
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import org.junit.jupiter.api.assertThrows
 
 class StackTest {
 
-    private fun baseEmp(
-        id: String = "X",
-        self: Double = Double.NaN,
-        peer: Double = Double.NaN,
-        mgr: Double = Double.NaN,
-        okr: Double = Double.NaN,
-        punctuality: Double = Double.NaN,
-        fixed: Int = 0,
-        assigned: Int = 0
-    ): Employee = Employee(
-        id = id, name = id, hireDate = LocalDate.parse("2022-01-01"),
-        role = "r", salary = 0, tenureMonths = 0,
-        punctualityRate = punctuality, problemsFixed = fixed, problemsAssigned = assigned,
-        volunteeringHours = 0, costToCompany = 0,
-        dept = "d", manager = "m", location = "loc", employmentType = "full",
-        selfEvaluation = self, peer360Feedback = peer, managerFeedback = mgr, okr = okr,
-        gender = "g", disabilityStatus = "No", sponsorship = "No", performanceScore = null
-    )
-
     @Test
-    fun perfectReviewsAndBehavior_scoreIs5() {
-        val e = baseEmp(self = 5.0, peer = 5.0, mgr = 5.0, okr = 100.0,
-                        punctuality = 1.0, fixed = 10, assigned = 10)
-        assertEquals(5, computePerformanceScore(e))
+    fun pushesIncreaseSizeAndPeekShowsTop() {
+        val st = Stack<Int>()
+        assertTrue(st.isEmpty())
+        assertEquals(0, st.size())
+
+        st.push(10)
+        assertFalse(st.isEmpty())
+        assertEquals(1, st.size())
+        assertEquals(10, st.peek())
+
+        st.push(20)
+        assertEquals(2, st.size())
+        assertEquals(20, st.peek()) // last pushed is on top
     }
 
     @Test
-    fun reviewsOnly_whenBehaviorMissing_usesReviewsMean() {
-        val e = baseEmp(self = 2.0, peer = 2.0, mgr = 2.0, okr = 40.0,
-                        punctuality = Double.NaN, fixed = 0, assigned = 0)
-        assertEquals(2, computePerformanceScore(e))
+    fun popReturnsTopAndShrinks() {
+        val st = Stack<String>()
+        st.push("a"); st.push("b"); st.push("c")
+        assertEquals(3, st.size())
+
+        assertEquals("c", st.pop())
+        assertEquals(2, st.size())
+        assertEquals("b", st.peek())
+
+        assertEquals("b", st.pop())
+        assertEquals(1, st.size())
+        assertEquals("a", st.peek())
+
+        assertEquals("a", st.pop())
+        assertEquals(0, st.size())
+        assertTrue(st.isEmpty())
     }
 
     @Test
-    fun behaviorOnly_whenReviewsMissing_averagesMappedSignals_andRounds() {
-        val e = baseEmp(punctuality = 0.25, fixed = 10, assigned = 20)
-        assertEquals(3, computePerformanceScore(e))
+    fun lifoOrderingWithMultipleElements() {
+        val st = Stack<Int>()
+        (1..5).forEach { st.push(it) } // stack top = 5
+        val popped = mutableListOf<Int>()
+        while (!st.isEmpty()) popped += st.pop()
+        assertEquals(listOf(5, 4, 3, 2, 1), popped) // LIFO
     }
 
     @Test
-    fun combined_usesWeights_pointSevenReviews_pointThreeBehavior_andRoundsHalfUp() {
-        val e = baseEmp(self = 3.0, peer = 3.0, mgr = 3.0, okr = 80.0,
-                        punctuality = 0.5, fixed = 1, assigned = 4)
-        assertEquals(3, computePerformanceScore(e))
+    fun peekOnEmptyReturnsNull() {
+        val st = Stack<Double>()
+        assertNull(st.peek())
+        st.push(3.14)
+        assertEquals(3.14, st.peek())
+        st.pop()
+        assertNull(st.peek())
     }
 
     @Test
-    fun productivitySkippedWhenAssignedIsZero() {
-        val e = baseEmp(punctuality = 0.9, fixed = 10, assigned = 0)
-        assertEquals(5, computePerformanceScore(e))
+    fun popOnEmptyThrows() {
+        val st = Stack<Int>()
+        assertThrows<NoSuchElementException> { st.pop() }
     }
 
     @Test
-    fun returnsNull_whenNoUsableReviewOrBehaviorSignals() {
-        val e = baseEmp(self = Double.NaN, peer = Double.NaN, mgr = Double.NaN, okr = Double.NaN,
-                        punctuality = Double.NaN, fixed = 0, assigned = 0)
-        assertNull(computePerformanceScore(e))
+    fun sizeAndIsEmptyStayConsistentThroughOps() {
+        val st = Stack<Int>()
+        assertTrue(st.isEmpty())
+        st.push(1); st.push(2); st.push(3)
+        assertEquals(3, st.size())
+        assertFalse(st.isEmpty())
+
+        st.pop()
+        assertEquals(2, st.size())
+        st.pop()
+        assertEquals(1, st.size())
+        st.pop()
+        assertEquals(0, st.size())
+        assertTrue(st.isEmpty())
     }
 
     @Test
-    fun clampsFinalToRangeOneToFive() {
-        val eLow = baseEmp(punctuality = 0.0, fixed = 0, assigned = 0)
-        val eHigh = baseEmp(self = 5.0, peer = 5.0, mgr = 5.0, okr = 100.0)
-        val sLow = computePerformanceScore(eLow)
-        val sHigh = computePerformanceScore(eHigh)
-        assertNotNull(sLow); assertTrue(sLow!! in 1..5)
-        assertNotNull(sHigh); assertTrue(sHigh!! in 1..5)
+    fun worksWithGenericTypes() {
+        data class E(val id: Int, val name: String)
+        val st = Stack<E>()
+        st.push(E(1, "Ada"))
+        st.push(E(2, "Grace"))
+        assertEquals(E(2, "Grace"), st.peek())
+        assertEquals(E(2, "Grace"), st.pop())
+        assertEquals(E(1, "Ada"), st.pop())
     }
 }
+
+
