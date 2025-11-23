@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Assignment B: Stacks, Queues & Priority (Kotlin)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Optional: Prism.js syntax highlighting theme -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --text: #222;
+      --muted: #666;
+      --bg: #fafafa;
+      --accent: #0b6faa;
+      --codebg: #f5f7f9;
+      --border: #e5e7eb;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: white;
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.75rem 1rem;
+      background: var(--bg);
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    h1, h2, h3 { line-height: 1.25; font-weight: 600; }
+    h1 { margin: 0 0 .25rem; font-size: 2rem; }
+    .meta { margin-top: .25rem; color: var(--muted); font-size: .95rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    section { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+    .callout {
+      background: var(--bg); border: 1px solid var(--border);
+      padding: .85rem 1rem; border-radius: .5rem;
+    }
+    pre {
+      border: 1px solid var(--border);
+      border-radius: .5rem;
+      padding: .85rem 1rem;
+      overflow: auto;
+      background: var(--codebg);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    ul { margin-top: .25rem; }
+    .footer-note { color: var(--muted); font-size: .9rem; margin-top: .75rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Assignment B: Stacks, Queues &amp; Priority (Kotlin)</h1>
+      <div class="meta">
+        Due: Wednesday, Oct 15, 10:00 pm
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ===================== INTRO ===================== -->
+    <section id="intro">
+      <h2>Introduction</h2>
+      <p>
+        In this assignment, you will build three classic data structures and use them to simulate different layoff rules:
+        Stack (LIFO) for “last hired, first out,” Linked Queue (FIFO) for “first hired, first out,” and a Priority policy implemented with a binary min-heap that lays off lower performance first and uses cost as a tie-breaker.
+      </p>
+      <p>
+        You will also write a performance score function that turns review data and behavior data into a single number from 1 to 5, or <code>null</code> when there is not enough information. The goals are to practice core programming skills, to see how technical choices change outcomes, and to reflect on the ethical and civic impact of applying these rules to people.
+      </p>
+
+      <div class="callout">
+        You will edit: <code>Lifolayoffs.kt</code>, <code>LinkedQueue.kt</code>, <code>Performance.kt</code>, <code>PriorityQueue.kt</code><br/>
+        Provided: <code>Employee.kt</code>, <code>Main.kt</code>, unit tests, <code>pom.xml</code>, <code>data/assignment_b1.csv</code>
+      </div>
+
+      <p class="footer-note">
+        Build and run instructions are in the project README. Use Java 17.
+      </p>
+    </section>
+
+    <!-- ===================== DEFINITIONS ===================== -->
+    <section id="definitions">
+      <h2>Definitions (quick guide)</h2>
+      <ul>
+        <li>LIFO (Last In, First Out): the most recently added item is removed first. A stack follows LIFO.</li>
+        <li>FIFO (First In, First Out): the earliest added item is removed first. A queue follows FIFO.</li>
+        <li>Binary min-heap: a tree-like structure stored in an array where each parent is less than or equal to its children; removing always returns the smallest element by a chosen rule.</li>
+        <li>Clamp: limit a value to a range. For example, clamping 5.8 to the range [1, 5] gives 5.</li>
+        <li>Round: convert a number to the nearest whole number. For example, 3.49 rounds to 3; 3.50 rounds to 4.</li>
+        <li>OKR: “Objectives and Key Results,” a goal-measure often recorded on a 0–100 scale in this dataset.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== DATASET ===================== -->
+    <section id="dataset">
+      <h2>The dataset</h2>
+      <p>
+        You can view the dataset in this Google Sheet:
+        <a href="https://docs.google.com/spreadsheets/d/1bAPGvAn8-HWLOWYl_GldGfa_it2YMZSAmUfN9MgNLxg/edit?gid=0#gid=0" target="_blank" rel="noopener">Dataset (view)</a>.
+        The application reads from <code>data/assignment_b1.csv</code>. If you update the sheet, export a CSV to refresh the file in the repo.
+      </p>
+      <ul>
+        <li>Jobs and pay: <code>hireDate</code>, <code>role</code>, <code>dept</code>, <code>tenureMonths</code>, <code>salary</code>, <code>costToCompany</code></li>
+        <li>Behavior: <code>punctualityRate</code> (0..1), <code>problemsFixed</code>, <code>problemsAssigned</code></li>
+        <li>Reviews: <code>selfEvaluation</code> (1–5), <code>peer360Feedback</code> (1–5), <code>managerFeedback</code> (1–5), <code>okr</code> (0–100)</li>
+        <li>Computed by you: <code>performanceScore</code> (starts as <code>null</code>)</li>
+      </ul>
+      <p class="footer-note">
+        Demographic columns are not used by the algorithms in this assignment. Consider them for fairness reflection only.
+      </p>
+    </section>
+
+    <!-- ===================== PART 1 ===================== -->
+    <section id="part1">
+      <h2>Part 1 — Stack (LIFO)</h2>
+
+      <h3>What this means</h3>
+      <p>
+        A stack removes the most recent item first. In this simulation: last hired, first out. The newest hire sits at the top of the stack.
+      </p>
+
+      <h3>What to do in <code>Lifolayoffs.kt</code></h3>
+      <ul>
+        <li>Implement a linked stack with:
+          <ul>
+            <li><code>push(item)</code>: place an item on top</li>
+            <li><code>pop()</code>: remove from top; throw if the stack is empty</li>
+            <li><code>peek()</code>: read the top item, or <code>null</code> if empty</li>
+            <li><code>isEmpty()</code> and <code>size()</code></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>How it runs</h3>
+      <p>
+        Load the CSV, sort by hireDate (earliest to latest), push in that order so the newest hire ends up on top, then repeatedly pop to produce the layoff order.
+      </p>
+
+      <div class="callout">
+        Be careful: <code>pop()</code> on an empty stack must throw; <code>peek()</code> must not change the size.
+      </div>
+    </section>
+
+    <!-- ===================== PART 2 ===================== -->
+    <section id="part2">
+      <h2>Part 2 — Linked Queue (FIFO)</h2>
+
+      <h3>What this means</h3>
+      <p>
+        A queue removes the earliest item first. In this simulation: first hired, first out. The earliest hire sits at the head of the queue.
+      </p>
+
+      <h3>What to do in <code>LinkedQueue.kt</code></h3>
+      <ul>
+        <li>Implement a linked queue with a head and a tail:
+          <ul>
+            <li><code>enqueue(x)</code>: add to tail</li>
+            <li><code>dequeue()</code>: remove from head; throw if the queue is empty</li>
+            <li><code>peek()</code>: head value, or <code>null</code> if empty</li>
+            <li><code>isEmpty()</code> and <code>size()</code></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>How it runs</h3>
+      <p>
+        Load the CSV, sort by hireDate (earliest to latest), enqueue in that order, then repeatedly dequeue to produce the layoff order (earliest first).
+      </p>
+
+      <div class="callout">
+        Be careful: when removing the last item, set both head and tail to <code>null</code>. Keep <code>size</code> correct at all times.
+      </div>
+    </section>
+
+    <!-- ===================== PART 3 ===================== -->
+    <section id="part3">
+      <h2>Part 3 — Performance score (returns 1..5 or null)</h2>
+
+      <h3>Why we need it</h3>
+      <p>
+        The priority policy needs one number per person. The recipe below is fixed and small. If there is not enough information, return <code>null</code>.
+      </p>
+
+      <h3>Step 1: Reviews (R)</h3>
+      <p>Use any values that are present; ignore missing or NaN:</p>
+      <ul>
+        <li>selfEvaluation (1–5)</li>
+        <li>peer360Feedback (1–5)</li>
+        <li>managerFeedback (1–5)</li>
+        <li>okr / 20.0 (convert OKR 0–100 to a 0–5 scale)</li>
+      </ul>
+      <p>R is the average of the present review values. If none are present, R is null.</p>
+
+      <h3>Step 2: Behavior (B)</h3>
+      <ul>
+        <li>Productivity = problemsFixed / problemsAssigned (if problemsAssigned is 0, skip productivity)</li>
+        <li>Punctuality = punctualityRate in the range 0..1</li>
+      </ul>
+      <p>
+        Map any behavior value v in the range 0..1 to the 1..5 scale using 1 + 4*v. If you have one or two mapped behavior values, B is the average. If none, B is null.
+      </p>
+
+      <h3>Step 3: Combine and finish</h3>
+      <ul>
+        <li>If both R and B exist: raw = 0.7*R + 0.3*B</li>
+        <li>If only R exists: raw = R</li>
+        <li>If only B exists: raw = B</li>
+        <li>If neither exists: return null</li>
+      </ul>
+      <p>
+        Then clamp raw to the range 1.0..5.0, round to the nearest whole number, and return that integer.
+      </p>
+
+      <div class="callout">
+        Common mistakes to avoid: do not treat missing values as 0; just ignore them. Do not include productivity when problemsAssigned is 0. Always divide OKR by 20 before averaging with 1–5 ratings. Always clamp to 1..5 and round to an integer at the end.
+        <br/><br/>
+        Your task in <code>Performance.kt</code>: implement <code>computePerformanceScore(e: Employee): Int?</code> exactly as described above.
+      </div>
+    </section>
+
+    <!-- ===================== PART 4 ===================== -->
+    <section id="part4">
+      <h2>Part 4 — Priority layoffs (min-heap)</h2>
+
+      <h3>What this means</h3>
+      <p>
+        A min-heap removes the smallest item first, based on a rule. Here, the rule uses two keys. The first key is performance; the second key is cost. Smaller comes out earlier.
+      </p>
+
+      <h3>Policy (two keys, in this order)</h3>
+      <ol>
+        <li>Lower performance first. People with a real score 1..5 are considered before people with a null score.</li>
+        <li>Higher cost next. Among equal performance, a higher positive costToCompany comes out earlier. Zero or missing cost should not move someone earlier.</li>
+      </ol>
+
+      <h3>Implementation idea</h3>
+      <pre><code class="language-kotlin">perfKey = performanceScore ?: Int.MAX_VALUE
+costKey = if (costToCompany &gt; 0) -costToCompany else Int.MAX_VALUE
+// Compare (perfKey, costKey) lexicographically in the min-heap.
+// Exact ties can be left as-is.</code></pre>
+
+      <h3>What to do in <code>PriorityQueue.kt</code></h3>
+      <ul>
+        <li>Build a small MinHeap&lt;T&gt; with push, pop, peek, isEmpty, size, and correct siftUp/siftDown.</li>
+        <li>Write sortEmployeesByPriority(...) to:
+          <ul>
+            <li>compute performance scores (Part 3),</li>
+            <li>push everyone into the heap using the policy above,</li>
+            <li>pop repeatedly to get the layoff order.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <div class="callout">
+        Be careful: treat null performance as worst (after real scores). For the same performance, higher positive cost comes first; zero or missing cost is last in that tie. In siftDown, always compare to the smaller child because this is a min-heap.
+      </div>
+    </section>
+
+    <!-- ===================== REFLECTION ===================== -->
+    <section id="reflection">
+      <h2>Reflection (answer briefly)</h2>
+      <ul>
+        <li>Who benefits and who gets hurt? For Stack (LIFO) and Priority (min-heap), who is protected, who is at risk, and which feels most fair?</li>
+        <li>If someone’s cost is high for reasons they cannot control (for example, insurance), is the cost tie-breaker fair?</li>
+        <li>Could reviews, OKR, punctuality, or assignments be biased against anyone? How would you notice and address that?</li>
+        <li>In LIFO, do new hires get punished? In FIFO (if used), do long-tenured employees get punished?</li>
+        <li>If two people tie, which tie-breaker can you defend as fair (for example, tenure, role criticality, or a lottery)?</li>
+      </ul>
+    </section>
+
+    <!-- ===================== SUBMISSION ===================== -->
+    <section id="submission">
+      <h2>Submission</h2>
+      <ul>
+        <li>Finish TODOs in <code>Lifolayoffs.kt</code>, <code>LinkedQueue.kt</code>, <code>Performance.kt</code>, <code>PriorityQueue.kt</code>.</li>
+        <li>Add a short <code>REFLECTION.md</code> (2–5 sentences total is fine).</li>
+        <li>Make sure all tests pass. Build and run instructions are in the README.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- Optional: Prism.js for code highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+</body>
+</html>
